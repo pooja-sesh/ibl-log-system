@@ -1,24 +1,25 @@
 import React from "react";
 import {StyledLogEntry} from "../../components/LogEntryStyle";
 import {FormWrapper} from "../../components/EntryFormStyle";
+import firebase from "../../services/firebase";
 
 export function EntryListItem(props) {
 
-    function deleteEntry() {
-        const newEntriesArray = [...props.entries].filter(entry => entry.id !== props.entryid)
-        props.setEntries(newEntriesArray)
+    const ref = firebase.firestore().collection('logs')
+
+    function deleteLog() {
+        // delete log entries
+        ref
+            .doc(props.entry.id)
+            .delete()
+            .catch((err) => {
+                console.log(err);
+            });
     }
 
     function updateEntry() {
-        console.log("before set entry input " + props.entryInput)
-        console.log("props title is " + props.title)
         props.setEntryInput(props.title)
-        console.log("after set entry input " + props.entryInput)
     }
-
-    // useEffect(() => {
-    //     props.setEntryInput(props.title)
-    // })
 
     return (
         <StyledLogEntry>
@@ -26,8 +27,7 @@ export function EntryListItem(props) {
             <p> <small>Posted on: {props.timeCreated}</small></p>
             <p>{props.title}</p>
             <button onClick={updateEntry}>edit</button>
-            <button onClick={deleteEntry}>delete</button>
+            <button onClick={deleteLog}>delete</button>
         </StyledLogEntry>
-
     )
 }

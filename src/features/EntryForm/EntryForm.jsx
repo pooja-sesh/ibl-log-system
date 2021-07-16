@@ -1,11 +1,11 @@
 // features
 import React, {useEffect, useState} from "react";
-import {makeStyles} from "@material-ui/core/styles";
 import {EntryList} from "../LogEntry/EntryList";
 import {v4 as uuidv4} from "uuid";
 import {Button} from "../../components/Button";
 import {StyledLabel, StyledEntryInput, FormWrapper} from "../../components/EntryFormStyle";
 import {StyledSelect} from "../../components/Dropdown";
+import firebase from "../../services/firebase"
 
 
 export function EntryForm() {
@@ -14,19 +14,9 @@ export function EntryForm() {
     const [submitValid, setButtonValid] = useState(false)
     const [wordCount, setWordCount] = useState(0)
     const [entryInput, setEntryInput] = useState("")
-
-    const useStyles = makeStyles((theme) => ({
-        formControl: {
-            margin: theme.spacing(1),
-            minWidth: 120,
-        },
-        selectEmpty: {
-            marginTop: theme.spacing(2),
-        },
-    }));
-
-    const classes = useStyles();
     const [day, setDay] = useState('')
+
+    const ref = firebase.firestore().collection('logs')
 
     const handleChange = (event) => {
         setDay(event.target.value);
@@ -63,6 +53,15 @@ export function EntryForm() {
 
     }
 
+    function addLog(newLog) {
+        // adding a new log entry
+        ref
+            .doc(newLog.id)
+            .set(newLog)
+            .catch((err) => {
+                console.error(err);
+            });
+    }
 
     function handleSubmit(event) {
         event.preventDefault();
@@ -74,8 +73,10 @@ export function EntryForm() {
         else { // if all input fields are filled
 
             // adding new entry
-            setAllEntries([...allEntries, {id: uuidv4(), title: inputValue, selectday: day,
-                timeCreated: Date().toLocaleString().substring(0,24)}])
+            // setAllEntries([...allEntries, {id: uuidv4(), title: inputValue, selectday: day,
+            //     timeCreated: Date().toLocaleString().substring(0,24)}])
+            addLog({id: uuidv4(), title: inputValue, selectday: day,
+                timeCreated: Date().toLocaleString().substring(0,24)})
 
             // resetting input fields
             event.target.elements.entryInput.value = ""
